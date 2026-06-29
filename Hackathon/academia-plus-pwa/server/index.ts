@@ -16,6 +16,7 @@ const app = express()
 const port = process.env.PORT ?? 3000
 const distDir = path.join(process.cwd(), 'dist')
 const distIndex = path.join(distDir, 'index.html')
+const apiPrefixes = ['/auth', '/category', '/categories', '/products', '/orders', '/users', '/posts', '/follows', '/notifications']
 
 app.use((_req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -45,7 +46,12 @@ app.use('/notifications', notificationsRouter)
 if (existsSync(distIndex)) {
   app.use(express.static(distDir))
 
-  app.get(/^\/(?!auth|category|categories|products|orders|users|posts|follows|notifications)(?:\/|$).*/, (_req, res) => {
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' || apiPrefixes.some((prefix) => req.path === prefix || req.path.startsWith(`${prefix}/`))) {
+      next()
+      return
+    }
+
     res.sendFile(distIndex)
   })
 } else {
