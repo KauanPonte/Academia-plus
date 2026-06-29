@@ -1,0 +1,262 @@
+<template>
+  <main class="space-y-6">
+    <section class="overflow-hidden rounded-2xl bg-gradient-to-br from-violet-900 via-violet-700 to-violet-500 text-white shadow-xl">
+      <div class="flex flex-wrap items-start justify-between gap-4 p-6">
+        <div class="flex items-center gap-4">
+          <img
+            src="https://picsum.photos/200"
+            alt="Perfil"
+            class="h-20 w-20 rounded-full border-4 border-white object-cover"
+          />
+          <div>
+            <h1 class="text-3xl font-black">{{ authStore.user?.name || 'Usuario' }}</h1>
+            <p class="text-slate-300">
+              @{{ username }} - {{ authStore.user?.course }} - {{ authStore.user?.institution }}
+            </p>
+          <span class="mt-2 inline-flex rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700">
+              {{ verificationLabel }}
+            </span>
+          </div>
+        </div>
+
+        <Button icon="pi pi-ellipsis-v" rounded text severity="secondary" @click="showMenu = !showMenu" />
+      </div>
+
+      <div class="grid grid-cols-3 border-t border-white/10 text-center">
+        <div class="p-4">
+          <strong class="block text-2xl">{{ myProducts.length }}</strong>
+          <span class="text-sm text-violet-50">publicações</span>
+        </div>
+        <div class="p-4">
+          <strong class="block text-2xl">48</strong>
+          <span class="text-sm text-violet-50">seguidores</span>
+        </div>
+        <div class="p-4">
+          <strong class="block text-2xl">56</strong>
+          <span class="text-sm text-violet-50">seguindo</span>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="showMenu" class="grid gap-3 md:grid-cols-3">
+      <button
+        class="rounded-xl border border-slate-200 bg-white p-4 text-left font-bold shadow-sm"
+        type="button"
+        @click="activePanel = 'saved'"
+      >
+        <i class="pi pi-bookmark mr-2 text-violet-700"></i>
+        Produtos salvos
+      </button>
+      <button
+        class="rounded-xl border border-slate-200 bg-white p-4 text-left font-bold shadow-sm"
+        type="button"
+        @click="activePanel = 'interested'"
+      >
+        <i class="pi pi-heart mr-2 text-violet-700"></i>
+        Interessados nos meus produtos
+      </button>
+      <button
+        class="rounded-xl border border-slate-200 bg-white p-4 text-left font-bold shadow-sm"
+        type="button"
+        @click="activePanel = 'settings'"
+      >
+        <i class="pi pi-cog mr-2 text-violet-700"></i>
+        Configurações da conta
+      </button>
+    </section>
+
+    <section
+      v-if="activePanel"
+      class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+    >
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-xl font-black">{{ panelTitle }}</h2>
+        <Button icon="pi pi-times" rounded text @click="activePanel = null" />
+      </div>
+
+      <div v-if="activePanel === 'saved'" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <RouterLink
+          v-for="product in savedProducts"
+          :key="product.id"
+          :to="{ name: 'product-detail', params: { id: product.id } }"
+          class="rounded-xl border border-slate-200 p-3"
+        >
+          <img :src="product.image" :alt="product.name" class="h-28 w-full rounded-lg bg-white object-contain p-2" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+          <strong class="mt-3 block truncate">{{ product.name }}</strong>
+          <small class="text-slate-500">Salvo para negociar depois</small>
+        </RouterLink>
+      </div>
+
+      <div v-else-if="activePanel === 'interested'" class="space-y-3">
+        <article
+          v-for="product in myProducts"
+          :key="product.id"
+          class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-4"
+        >
+          <div>
+            <strong class="block">{{ product.name }}</strong>
+            <span class="text-sm text-slate-500">{{ product.interested }} alunos demonstraram interesse</span>
+          </div>
+          <RouterLink to="/chat" class="text-sm font-bold text-violet-700">
+            Ver conversas
+          </RouterLink>
+        </article>
+      </div>
+
+      <div v-else class="grid gap-4 md:grid-cols-2">
+        <label>
+          <span class="mb-2 block text-sm font-bold text-slate-600">Nome</span>
+          <InputText :model-value="authStore.user?.name" class="profile-input w-full" />
+        </label>
+        <label>
+          <span class="mb-2 block text-sm font-bold text-slate-600">Curso</span>
+          <InputText :model-value="authStore.user?.course" class="profile-input w-full" />
+        </label>
+        <label>
+          <span class="mb-2 block text-sm font-bold text-slate-600">Cidade</span>
+          <InputText :model-value="authStore.user?.city" class="profile-input w-full" />
+        </label>
+        <label>
+          <span class="mb-2 block text-sm font-bold text-slate-600">Tema</span>
+          <select class="h-11 w-full rounded-md border border-violet-200 bg-violet-50 px-3 text-violet-950">
+            <option>Claro</option>
+            <option>Escuro</option>
+          </select>
+        </label>
+        <p class="md:col-span-2 rounded-lg bg-violet-50 p-3 text-sm text-violet-900">
+          O modo escuro deve ser uma preferência da conta. Quando ativo, todas as telas entram no
+          tema escuro de forma consistente.
+        </p>
+      </div>
+    </section>
+
+    <section class="grid gap-6 lg:grid-cols-[360px_1fr]">
+      <aside class="space-y-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 class="text-xl font-black text-violet-950">Conquistas</h2>
+          <div class="mt-4 flex flex-wrap gap-2 text-xs font-bold">
+            <span class="rounded-full bg-violet-50 px-3 py-2 text-violet-700">Monitor</span>
+            <span class="rounded-full bg-emerald-50 px-3 py-2 text-emerald-700">Vendedor confiável</span>
+            <span class="rounded-full bg-amber-50 px-3 py-2 text-amber-700">Fundador</span>
+          </div>
+        </div>
+
+        <form class="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm" @submit.prevent="publishProduct">
+          <h2 class="text-xl font-black text-violet-950">Publicar produto</h2>
+          <div class="mt-4 space-y-3">
+            <InputText v-model="draft.name" class="profile-input w-full" placeholder="Nome do produto" />
+            <InputText v-model="draft.category" class="profile-input w-full" placeholder="Categoria" />
+            <InputText v-model="draft.price" class="profile-input w-full" placeholder="Preço" />
+            <InputText v-model="draft.location" class="profile-input w-full" placeholder="Cidade, UF" />
+            <Button label="Enviar produto" icon="pi pi-upload" class="w-full border-none bg-emerald-400 text-slate-950" type="submit" />
+          </div>
+        </form>
+      </aside>
+
+      <section>
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-2xl font-black">Minhas publicações</h2>
+          <span class="text-sm text-slate-500">{{ myProducts.length }} produtos</span>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <RouterLink
+            v-for="product in myProducts"
+            :key="product.id"
+            :to="{ name: 'product-detail', params: { id: product.id } }"
+            class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+          >
+            <img :src="product.image" :alt="product.name" class="h-44 w-full bg-white object-contain p-3" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+            <div class="p-4">
+              <strong class="block truncate">{{ product.name }}</strong>
+              <span class="text-sm text-slate-500">{{ product.interested }} interessados</span>
+              <p class="mt-2 font-black">R$ {{ product.price }},00</p>
+            </div>
+          </RouterLink>
+        </div>
+      </section>
+    </section>
+  </main>
+</template>
+
+<script setup lang="ts">
+import { computed, reactive, ref } from 'vue'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
+import { Product } from '@/model/product.model'
+import { savedProductIds, store } from '@/store'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
+const showMenu = ref(false)
+const activePanel = ref<null | 'saved' | 'interested' | 'settings'>(null)
+
+const draft = reactive({
+  name: '',
+  category: '',
+  price: '',
+  location: '',
+})
+
+const username = computed(() => authStore.user?.email.split('@')[0] || 'aluno')
+const myProducts = computed(() => store.products.filter((product) => product.seller === 'larissa.dev'))
+const savedProducts = computed(() => store.products.filter((product) => savedProductIds.has(product.id)))
+const panelTitle = computed(() => {
+  if (activePanel.value === 'saved') return 'Produtos salvos'
+  if (activePanel.value === 'interested') return 'Interessados nos meus produtos'
+  return 'Configurações da conta'
+})
+const verificationLabel = computed(() =>
+  authStore.user?.verificationStatus === 'institutional_email'
+    ? 'Estudante Verificado'
+    : 'Aluno em verificação',
+)
+
+function publishProduct() {
+  if (!draft.name || !draft.price) return
+
+  store.products.unshift(
+    new Product(
+      Date.now(),
+      draft.name,
+      'Produto publicado pelo perfil. Complete a descrição nas configurações do item.',
+      Number(draft.price),
+      { id: Date.now(), name: draft.category || 'Material de estudo' },
+      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
+      'larissa.dev',
+      authStore.user?.course || 'Curso',
+      authStore.user?.institution || 'Instituicao',
+      draft.location || `${authStore.user?.city}, ${authStore.user?.state}`,
+      authStore.user?.state || 'SP',
+      'Usado',
+      0,
+    ),
+  )
+
+  draft.name = ''
+  draft.category = ''
+  draft.price = ''
+  draft.location = ''
+}
+</script>
+
+<style scoped>
+:deep(.profile-input),
+:deep(.p-inputtext) {
+  border: 1px solid #ddd6fe;
+  background: #f5f3ff;
+  color: #2e1065;
+  box-shadow: none;
+}
+
+:deep(.profile-input::placeholder),
+:deep(.p-inputtext::placeholder) {
+  color: #7c6faf;
+}
+
+:deep(.profile-input:enabled:focus),
+:deep(.p-inputtext:enabled:focus) {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.18);
+}
+</style>
