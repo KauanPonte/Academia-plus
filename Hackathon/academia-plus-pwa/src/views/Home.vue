@@ -16,28 +16,32 @@
           {{ notificationMessage }}
         </p>
 
-        <div class="mt-4 flex gap-5 overflow-x-auto pb-4">
+        <div class="mt-4 flex gap-4 overflow-x-auto pb-4">
           <button
             v-for="story in feedStories"
             :key="story.label"
             type="button"
-            class="grid w-20 shrink-0 justify-items-center gap-2 text-center"
+            class="grid w-[76px] shrink-0 justify-items-center gap-2 overflow-hidden text-center"
             @click="selectStory(story)"
           >
             <span
-              class="relative grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-violet-500 via-emerald-400 to-orange-400 p-[3px]"
+              class="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-violet-500 via-emerald-400 to-orange-400 p-[3px]"
             >
-              <span class="grid h-full w-full place-items-center rounded-full bg-white p-[3px]">
+              <span class="grid h-full w-full place-items-center overflow-hidden rounded-full bg-white p-[3px]">
                 <img
                   v-if="story.avatar"
                   :src="story.avatar"
                   :alt="story.label"
-                  class="h-full w-full rounded-full object-cover"
+                  class="block h-full max-h-full w-full max-w-full rounded-full"
+                  :class="story.kind === 'product' ? 'bg-white object-contain p-1' : 'object-cover'"
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
                 />
                 <span
                   v-else
                   :class="story.color"
-                  class="grid h-full w-full place-items-center rounded-full text-xl font-black text-white"
+                  class="grid h-full w-full place-items-center overflow-hidden rounded-full text-xl font-black text-white"
                 >
                   {{ story.initials }}
                 </span>
@@ -49,7 +53,7 @@
                 +
               </span>
             </span>
-            <span class="line-clamp-2 min-h-9 text-xs font-bold leading-tight text-slate-600">
+            <span class="line-clamp-2 min-h-8 w-full max-w-[76px] overflow-hidden text-ellipsis break-words text-[11px] font-bold leading-tight text-slate-600">
               {{ story.label }}
             </span>
           </button>
