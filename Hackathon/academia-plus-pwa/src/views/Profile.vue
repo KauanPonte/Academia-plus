@@ -38,11 +38,19 @@
       </div>
     </section>
 
-    <section v-if="showMenu" class="grid gap-3 md:grid-cols-3">
+    <section v-if="showMenu" class="grid gap-3 md:grid-cols-4">
+      <button
+        class="rounded-xl border border-emerald-100 bg-white p-4 text-left font-bold shadow-sm"
+        type="button"
+        @click="openPanel('publish')"
+      >
+        <i class="pi pi-plus-circle mr-2 text-emerald-600"></i>
+        Publicar item
+      </button>
       <button
         class="rounded-xl border border-slate-200 bg-white p-4 text-left font-bold shadow-sm"
         type="button"
-        @click="activePanel = 'saved'"
+        @click="openPanel('saved')"
       >
         <i class="pi pi-bookmark mr-2 text-violet-700"></i>
         Produtos salvos
@@ -50,7 +58,7 @@
       <button
         class="rounded-xl border border-slate-200 bg-white p-4 text-left font-bold shadow-sm"
         type="button"
-        @click="activePanel = 'interested'"
+        @click="openPanel('interested')"
       >
         <i class="pi pi-heart mr-2 text-violet-700"></i>
         Interessados nos meus produtos
@@ -58,7 +66,7 @@
       <button
         class="rounded-xl border border-slate-200 bg-white p-4 text-left font-bold shadow-sm"
         type="button"
-        @click="activePanel = 'settings'"
+        @click="openPanel('settings')"
       >
         <i class="pi pi-cog mr-2 text-violet-700"></i>
         Configurações da conta
@@ -74,7 +82,35 @@
         <Button icon="pi pi-times" rounded text @click="activePanel = null" />
       </div>
 
-      <div v-if="activePanel === 'saved'" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <form v-if="activePanel === 'publish'" class="grid gap-4 md:grid-cols-2" @submit.prevent="publishProduct">
+        <label>
+          <span class="mb-2 block text-sm font-bold text-slate-600">Nome do item</span>
+          <InputText v-model="draft.name" class="profile-input w-full" placeholder="Calculadora, livro, jaleco..." />
+        </label>
+        <label>
+          <span class="mb-2 block text-sm font-bold text-slate-600">Categoria</span>
+          <InputText v-model="draft.category" class="profile-input w-full" placeholder="Material de estudo" />
+        </label>
+        <label>
+          <span class="mb-2 block text-sm font-bold text-slate-600">Preço</span>
+          <InputText v-model="draft.price" class="profile-input w-full" placeholder="120" />
+        </label>
+        <label>
+          <span class="mb-2 block text-sm font-bold text-slate-600">Cidade, UF</span>
+          <InputText v-model="draft.location" class="profile-input w-full" placeholder="Fortaleza, CE" />
+        </label>
+        <p class="rounded-lg bg-emerald-50 p-3 text-sm font-semibold text-emerald-900 md:col-span-2">
+          O item aparece nas suas publicações e pode ser encontrado no marketplace estudantil.
+        </p>
+        <Button
+          label="Publicar item"
+          icon="pi pi-upload"
+          class="h-12 w-full border-none bg-emerald-400 font-bold text-slate-950 md:col-span-2"
+          type="submit"
+        />
+      </form>
+
+      <div v-else-if="activePanel === 'saved'" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <RouterLink
           v-for="product in savedProducts"
           :key="product.id"
@@ -103,7 +139,7 @@
         </article>
       </div>
 
-      <div v-else class="grid gap-4 md:grid-cols-2">
+      <div v-else-if="activePanel === 'settings'" class="grid gap-4 md:grid-cols-2">
         <label>
           <span class="mb-2 block text-sm font-bold text-slate-600">Nome</span>
           <InputText :model-value="authStore.user?.name" class="profile-input w-full" />
@@ -140,17 +176,6 @@
             <span class="rounded-full bg-amber-50 px-3 py-2 text-amber-700">Fundador</span>
           </div>
         </div>
-
-        <form class="rounded-xl border border-emerald-100 bg-white p-4 shadow-sm" @submit.prevent="publishProduct">
-          <h2 class="text-xl font-black text-violet-950">Publicar produto</h2>
-          <div class="mt-4 space-y-3">
-            <InputText v-model="draft.name" class="profile-input w-full" placeholder="Nome do produto" />
-            <InputText v-model="draft.category" class="profile-input w-full" placeholder="Categoria" />
-            <InputText v-model="draft.price" class="profile-input w-full" placeholder="Preço" />
-            <InputText v-model="draft.location" class="profile-input w-full" placeholder="Cidade, UF" />
-            <Button label="Enviar produto" icon="pi pi-upload" class="w-full border-none bg-emerald-400 text-slate-950" type="submit" />
-          </div>
-        </form>
       </aside>
 
       <section>
@@ -190,7 +215,8 @@ import { apiGetUser } from '@/services/api'
 
 const authStore = useAuthStore()
 const showMenu = ref(false)
-const activePanel = ref<null | 'saved' | 'interested' | 'settings'>(null)
+type ProfilePanel = 'publish' | 'saved' | 'interested' | 'settings'
+const activePanel = ref<null | ProfilePanel>(null)
 
 const followerCount = ref<number | null>(null)
 const followingCount = ref<number | null>(null)
@@ -236,6 +262,7 @@ const myProducts = computed(() => {
 })
 const savedProducts = computed(() => store.products.filter((product) => savedProductIds.has(product.id)))
 const panelTitle = computed(() => {
+  if (activePanel.value === 'publish') return 'Publicar item'
   if (activePanel.value === 'saved') return 'Produtos salvos'
   if (activePanel.value === 'interested') return 'Interessados nos meus produtos'
   return 'Configurações da conta'
@@ -271,6 +298,13 @@ function publishProduct() {
   draft.category = ''
   draft.price = ''
   draft.location = ''
+  activePanel.value = null
+  showMenu.value = false
+}
+
+function openPanel(panel: ProfilePanel) {
+  activePanel.value = panel
+  showMenu.value = false
 }
 </script>
 
