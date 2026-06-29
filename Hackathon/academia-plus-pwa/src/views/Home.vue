@@ -6,7 +6,7 @@
           <h1 class="text-3xl font-black tracking-normal text-slate-950">
             Academia<span class="text-violet-600">+</span>
           </h1>
-         
+
         </div>
 
         <p
@@ -97,14 +97,29 @@
         <p class="mt-1 text-sm leading-relaxed">{{ tabNotice.description }}</p>
       </section>
 
-      <section class="mt-4 space-y-4">
+      <div v-if="loadingPosts" class="mt-6 flex justify-center py-8">
+        <span class="text-slate-400 font-bold">Carregando posts...</span>
+      </div>
+
+      <section v-else class="mt-4 space-y-4">
         <article
           v-for="post in visiblePosts"
           :key="post.id"
           class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
         >
           <header class="flex items-center gap-3 p-4">
-            <img :src="post.avatar" :alt="post.author" class="h-11 w-11 rounded-full object-cover ring-2 ring-violet-100" />
+            <img
+              v-if="post.avatar"
+              :src="post.avatar"
+              :alt="post.author"
+              class="h-11 w-11 rounded-full object-cover ring-2 ring-violet-100"
+            />
+            <span
+              v-else
+              class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-violet-600 text-base font-black text-white ring-2 ring-violet-100"
+            >
+              {{ post.author.charAt(0).toUpperCase() }}
+            </span>
             <div class="min-w-0 flex-1">
               <strong class="block truncate">{{ post.author }}</strong>
               <small class="block truncate text-slate-500">{{ post.course }} • {{ post.institution }}</small>
@@ -112,10 +127,10 @@
             <span class="hidden rounded-full px-3 py-1 text-xs font-black sm:inline-flex" :class="postMeta(post.type).class">
               {{ postMeta(post.type).label }}
             </span>
-            <small class="font-bold text-slate-400">{{ compactTime(post.publishedAt) }}</small>
+            <small class="font-bold text-slate-400">{{ post.publishedAt }}</small>
           </header>
 
-          <template v-if="post.type === 'sale' && productById(post.productId)">
+          <template v-if="post.type === 'sale' && post.productId && productById(post.productId)">
             <div class="relative grid max-h-[340px] min-h-[220px] place-items-center overflow-hidden bg-white md:max-h-[360px]">
               <img
                 :src="productById(post.productId)?.image"
@@ -165,7 +180,7 @@
             <p class="mt-3 text-lg leading-relaxed">{{ post.text }}</p>
             <div class="mt-4 flex flex-wrap gap-2 text-xs font-bold text-slate-500">
               <span>{{ post.publishedAt }}</span>
-              <span>{{ post.distance }}</span>
+              <span v-if="post.distance">{{ post.distance }}</span>
               <span>{{ post.institution }}</span>
             </div>
           </div>
@@ -183,7 +198,7 @@
             <button
               type="button"
               class="inline-flex items-center gap-2 rounded-full px-3 py-2 transition hover:bg-emerald-50 hover:text-emerald-700"
-              @click="activeTab = 'institution'"
+              @click="openComment(post)"
             >
               <i class="pi pi-comment"></i>
               {{ post.comments }}
@@ -199,6 +214,25 @@
               {{ isProductSaved(post.productId) ? 'Salvo' : 'Salvar' }}
             </button>
           </footer>
+
+          <!-- Caixa de comentário inline -->
+          <div v-if="commentingPostId === post.id" class="border-t border-slate-100 p-4">
+            <form class="flex gap-2" @submit.prevent="submitComment(post)">
+              <input
+                v-model="commentText"
+                class="flex-1 rounded-full border border-violet-200 bg-violet-50 px-4 py-2 text-sm text-violet-950 placeholder-violet-300 outline-none focus:border-violet-500"
+                placeholder="Escreva um comentário..."
+                autofocus
+              />
+              <button
+                type="submit"
+                class="rounded-full bg-violet-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                :disabled="!commentText.trim()"
+              >
+                Enviar
+              </button>
+            </form>
+          </div>
         </article>
       </section>
     </section>
@@ -254,15 +288,64 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { isProductSaved, store, toggleSavedProduct, type FeedPostType } from '@/store'
 import { useAuthStore } from '@/stores/auth'
+import { apiFetchPosts, apiLikePost, apiUnlikePost, apiCommentPost } from '@/services/api'
 
 const authStore = useAuthStore()
 const activeTab = ref('for-you')
 const activeFilter = ref('all')
-const likedPosts = ref(new Set<number>())
+const likedPosts = ref(new Set<string | number>())
 const notificationMessage = ref('')
+const loadingPosts = ref(false)
+const commentingPostId = ref<string | number | null>(null)
+const commentText = ref('')
+
+// Tipo unificado para posts da API e posts locais
+interface DisplayPost {
+  id: string | number
+  author: string
+  course: string
+  institution: string
+  avatar: string
+  type: FeedPostType
+  text?: string
+  likes: number
+  comments: number
+  distance?: string
+  publishedAt: string
+  likedByMe: boolean
+  productId?: number
+}
+
+interface ApiPostAuthor {
+  id: string
+  name: string
+  course?: string
+  institution?: string
+}
+
+interface ApiPost {
+  id: string
+  authorId: string
+  content: string
+  type: string
+  createdAt: string
+  author: ApiPostAuthor
+  likesCount: number
+  commentsCount: number
+  likedByMe: boolean
+}
+
+interface ApiPostsResponse {
+  data: ApiPost[]
+  page: number
+  size: number
+  total: number
+}
+
+const apiPosts = ref<DisplayPost[]>([])
 
 const tabs = [
   { label: 'Para você', value: 'for-you' },
@@ -279,6 +362,89 @@ const filters = [
   { label: 'Monitorias', value: 'mentoring' },
   { label: 'Perto de mim', value: 'nearby' },
 ]
+
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMin = Math.floor(diffMs / 60000)
+  const diffH = Math.floor(diffMin / 60)
+  const diffD = Math.floor(diffH / 24)
+
+  if (diffMin < 1) return 'agora'
+  if (diffMin < 60) return `há ${diffMin} min`
+  if (diffH < 24) return `há ${diffH}h`
+  if (diffD === 1) return 'ontem'
+  return `há ${diffD} dias`
+}
+
+function mapApiPost(post: ApiPost): DisplayPost {
+  return {
+    id: post.id,
+    author: post.author?.name ?? 'Usuário',
+    course: post.author?.course ?? 'Estudante',
+    institution: post.author?.institution ?? 'Academia+',
+    avatar: '',
+    type: (post.type as FeedPostType) ?? 'question',
+    text: post.content,
+    likes: post.likesCount,
+    comments: post.commentsCount,
+    distance: undefined,
+    publishedAt: formatRelativeTime(post.createdAt),
+    likedByMe: post.likedByMe,
+  }
+}
+
+async function fetchPosts() {
+  if (!authStore.token || authStore.token.startsWith('demo-token')) return
+
+  loadingPosts.value = true
+  try {
+    const response = await apiFetchPosts<ApiPostsResponse>(authStore.token)
+    apiPosts.value = response.data.map(mapApiPost)
+
+    // Marcar posts já curtidos pelo usuário logado
+    const initialLiked = new Set<string | number>(
+      response.data.filter((p) => p.likedByMe).map((p) => p.id),
+    )
+    likedPosts.value = initialLiked
+  } catch {
+    // API offline — feed local já cobre visualmente
+  } finally {
+    loadingPosts.value = false
+  }
+}
+
+onMounted(() => {
+  fetchPosts()
+})
+
+// Posts locais convertidos para o mesmo formato
+const localDisplayPosts = computed<DisplayPost[]>(() =>
+  store.feedPosts.map((p) => ({
+    id: p.id,
+    author: p.author,
+    course: p.course,
+    institution: p.institution,
+    avatar: p.avatar,
+    type: p.type,
+    text: p.text,
+    likes: p.likes,
+    comments: p.comments,
+    distance: p.distance,
+    publishedAt: p.publishedAt,
+    likedByMe: false,
+    productId: p.productId,
+  })),
+)
+
+// Todos os posts: API primeiro, depois locais que não se sobrepõem
+const allPosts = computed<DisplayPost[]>(() => {
+  if (apiPosts.value.length > 0) {
+    return [...apiPosts.value, ...localDisplayPosts.value]
+  }
+  return localDisplayPosts.value
+})
 
 const feedStories = computed(() => [
   {
@@ -301,20 +467,21 @@ const feedStories = computed(() => [
 ])
 
 const visiblePosts = computed(() => {
-  let posts = store.feedPosts
+  let posts = allPosts.value
   const currentInstitution = authStore.user?.institution || 'IFCE'
 
   if (activeTab.value === 'following') {
     posts = posts.filter(
       (post) =>
-        ['joao.backend', 'maria.front', 'prof.mentor'].includes(post.author) &&
-        !(post.institution === currentInstitution && post.type === 'question'),
+        ['joao.backend', 'maria.front', 'prof.mentor'].includes(post.author) ||
+        typeof post.id === 'string',
     )
   } else if (activeTab.value === 'institution') {
     posts = posts.filter((post) => post.institution === currentInstitution)
   } else {
     posts = posts.filter(
       (post) =>
+        typeof post.id === 'string' ||
         ['event', 'internship', 'mentoring'].includes(post.type) ||
         (post.type === 'sale' && post.institution !== currentInstitution),
     )
@@ -357,17 +524,65 @@ function productById(id?: number) {
   return store.products.find((product) => product.id === id)
 }
 
-function toggleLike(post: (typeof store.feedPosts)[number]) {
-  if (likedPosts.value.has(post.id)) {
+async function toggleLike(post: DisplayPost) {
+  const liked = likedPosts.value.has(post.id)
+
+  // Atualização otimista: muda a UI imediatamente
+  if (liked) {
     likedPosts.value.delete(post.id)
-    likedPosts.value = new Set(likedPosts.value)
     post.likes -= 1
+  } else {
+    likedPosts.value.add(post.id)
+    post.likes += 1
+  }
+  likedPosts.value = new Set(likedPosts.value)
+
+  // Se for post da API (id é string UUID), persiste no backend
+  if (typeof post.id === 'string' && authStore.token && !authStore.token.startsWith('demo-token')) {
+    try {
+      if (liked) {
+        await apiUnlikePost(authStore.token, post.id)
+      } else {
+        await apiLikePost(authStore.token, post.id)
+      }
+    } catch {
+      // Reverte se der erro
+      if (liked) {
+        likedPosts.value.add(post.id)
+        post.likes += 1
+      } else {
+        likedPosts.value.delete(post.id)
+        post.likes -= 1
+      }
+      likedPosts.value = new Set(likedPosts.value)
+    }
+  }
+}
+
+function openComment(post: DisplayPost) {
+  if (commentingPostId.value === post.id) {
+    commentingPostId.value = null
     return
   }
+  commentingPostId.value = post.id
+  commentText.value = ''
+}
 
-  likedPosts.value.add(post.id)
-  likedPosts.value = new Set(likedPosts.value)
-  post.likes += 1
+async function submitComment(post: DisplayPost) {
+  const text = commentText.value.trim()
+  if (!text) return
+
+  post.comments += 1
+  commentText.value = ''
+  commentingPostId.value = null
+
+  if (typeof post.id === 'string' && authStore.token && !authStore.token.startsWith('demo-token')) {
+    try {
+      await apiCommentPost(authStore.token, post.id, text)
+    } catch {
+      post.comments -= 1
+    }
+  }
 }
 
 function selectStory(story: (typeof feedStories.value)[number]) {
@@ -385,10 +600,6 @@ function originalPrice(price?: number) {
   return Math.round((price || 0) * 1.5)
 }
 
-function compactTime(time: string) {
-  return time.replace('ha ', '').replace(' horas', 'h').replace(' hora', 'h').replace(' min', 'min')
-}
-
 function postMeta(type: FeedPostType) {
   const meta = {
     sale: { label: 'Produto', class: 'bg-violet-50 text-violet-700' },
@@ -396,8 +607,9 @@ function postMeta(type: FeedPostType) {
     event: { label: 'Evento', class: 'bg-emerald-50 text-emerald-700' },
     internship: { label: 'Estagio', class: 'bg-orange-50 text-orange-700' },
     mentoring: { label: 'Monitoria', class: 'bg-rose-50 text-rose-700' },
+    post: { label: 'Post', class: 'bg-slate-50 text-slate-700' },
   }
 
-  return meta[type]
+  return meta[type] ?? meta.post
 }
 </script>
