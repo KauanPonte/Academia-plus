@@ -446,7 +446,18 @@ const allPosts = computed<DisplayPost[]>(() => {
   return localDisplayPosts.value
 })
 
-const feedStories = computed(() => [
+interface FeedStory {
+  label: string
+  initials: string
+  color: string
+  avatar: string
+  isMine: boolean
+  institution: string
+  kind: 'mine' | 'product' | 'announcement' | 'community'
+  message: string
+}
+
+const feedStories = computed<FeedStory[]>(() => [
   {
     label: 'Seu story',
     initials: 'EU',
@@ -455,14 +466,42 @@ const feedStories = computed(() => [
       'https://picsum.photos/200',
     isMine: true,
     institution: authStore.user?.institution || 'IFCE',
+    kind: 'mine' as const,
+    message: 'Seu espaço: veja recomendações, produtos e avisos selecionados para você.',
   },
-  ...store.communities.slice(0, 5).map((community) => ({
+  ...store.products.slice(0, 3).map((product) => ({
+    label: product.name,
+    initials: product.name.slice(0, 2).toUpperCase(),
+    color: 'bg-emerald-600',
+    avatar: product.image,
+    isMine: false,
+    institution: product.sellerInstitution,
+    kind: 'product' as const,
+    message: `${product.name} está no marketplace por R$ ${product.price},00.`,
+  })),
+  {
+    label: 'Comunicado',
+    initials: 'AV',
+    color: 'bg-orange-500',
+    avatar:
+      'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=256&q=80',
+    isMine: false,
+    institution: authStore.user?.institution || 'IFCE',
+    kind: 'announcement' as const,
+    message: 'Comunicados da sua instituição: eventos, prazos e oportunidades em destaque.',
+  },
+  ...store.communities.slice(0, 4).map((community) => ({
     label: community.title,
     initials: community.course.slice(0, 2).toUpperCase(),
     color: community.color,
-    avatar: '',
+    avatar:
+      community.id % 2 === 0
+        ? 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=256&q=80'
+        : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=256&q=80',
     isMine: false,
     institution: community.institution,
+    kind: 'community' as const,
+    message: `Você abriu ${community.title}: publicações e avisos dessa comunidade foram destacados.`,
   })),
 ])
 
@@ -585,10 +624,24 @@ async function submitComment(post: DisplayPost) {
   }
 }
 
-function selectStory(story: (typeof feedStories.value)[number]) {
-  if (story.isMine) {
+function selectStory(story: FeedStory) {
+  notificationMessage.value = story.message
+
+  if (story.kind === 'mine') {
     activeTab.value = 'for-you'
     activeFilter.value = 'all'
+    return
+  }
+
+  if (story.kind === 'product') {
+    activeTab.value = 'for-you'
+    activeFilter.value = 'sale'
+    return
+  }
+
+  if (story.kind === 'announcement') {
+    activeTab.value = 'institution'
+    activeFilter.value = 'event'
     return
   }
 

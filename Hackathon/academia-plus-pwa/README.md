@@ -29,6 +29,19 @@ URLs:
 - API: `http://localhost:3000`
 - PWA: `http://localhost:5173`
 
+Para servir a mesma interface do PWA pela API:
+
+```sh
+npm run build
+npm run api:build
+npm run api:start
+```
+
+Depois acesse:
+
+- API + telas PWA: `http://localhost:3000`
+- Login/onboarding: `http://localhost:3000/login`
+
 Builds de validação:
 
 ```sh
@@ -84,6 +97,8 @@ Funcionalidades obrigatórias:
 - Visualizar perfil próprio
 - Visualizar perfil de outros usuários
 - Navegar pelo feed, perfil, chat, comunidades e marketplace
+- Publicar item pelo perfil do usuário, no menu de três pontinhos
+- Acessar stories clicáveis com fotos de produtos, comunidades e comunicados
 
 ## Backend
 
@@ -208,4 +223,5 @@ Authorization: Bearer <token>
 - Chat iniciado a partir de produtos.
 - Preferências de comunidade.
 - Notificações simplificadas.
-
+- Stories com destaque de marketplace, comunicados e comunidades.
+- Publicação de item concentrada no perfil do usuário.
