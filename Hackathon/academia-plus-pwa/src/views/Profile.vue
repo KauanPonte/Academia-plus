@@ -28,11 +28,11 @@
           <span class="text-sm text-violet-50">publicações</span>
         </div>
         <div class="p-4">
-          <strong class="block text-2xl">48</strong>
+          <strong class="block text-2xl">{{ displayFollowers }}</strong>
           <span class="text-sm text-violet-50">seguidores</span>
         </div>
         <div class="p-4">
-          <strong class="block text-2xl">56</strong>
+          <strong class="block text-2xl">{{ displayFollowing }}</strong>
           <span class="text-sm text-violet-50">seguindo</span>
         </div>
       </div>
@@ -180,16 +180,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import { Product } from '@/model/product.model'
 import { savedProductIds, store } from '@/store'
 import { useAuthStore } from '@/stores/auth'
+import { apiGetUser } from '@/services/api'
 
 const authStore = useAuthStore()
 const showMenu = ref(false)
 const activePanel = ref<null | 'saved' | 'interested' | 'settings'>(null)
+
+const followerCount = ref<number | null>(null)
+const followingCount = ref<number | null>(null)
 
 const draft = reactive({
   name: '',
@@ -198,8 +202,38 @@ const draft = reactive({
   location: '',
 })
 
+interface UserProfile {
+  id: string
+  name: string
+  email: string
+  course?: string
+  institution?: string
+  followerCount: number
+  followingCount: number
+}
+
+onMounted(async () => {
+  const userId = authStore.user?.id
+  if (!userId || !authStore.token || authStore.token.startsWith('demo-token')) return
+
+  try {
+    const profile = await apiGetUser<UserProfile>(authStore.token, userId)
+    followerCount.value = profile.followerCount
+    followingCount.value = profile.followingCount
+  } catch {
+    // Mantém os valores padrão se a API falhar
+  }
+})
+
 const username = computed(() => authStore.user?.email.split('@')[0] || 'aluno')
-const myProducts = computed(() => store.products.filter((product) => product.seller === 'larissa.dev'))
+const displayFollowers = computed(() => followerCount.value ?? 0)
+const displayFollowing = computed(() => followingCount.value ?? 0)
+const myProducts = computed(() => {
+  const emailUser = authStore.user?.email.split('@')[0] || ''
+  return store.products.filter(
+    (product) => product.seller === 'larissa.dev' || product.seller === emailUser,
+  )
+})
 const savedProducts = computed(() => store.products.filter((product) => savedProductIds.has(product.id)))
 const panelTitle = computed(() => {
   if (activePanel.value === 'saved') return 'Produtos salvos'
@@ -223,7 +257,7 @@ function publishProduct() {
       Number(draft.price),
       { id: Date.now(), name: draft.category || 'Material de estudo' },
       'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
-      'larissa.dev',
+      authStore.user?.email.split('@')[0] || 'aluno',
       authStore.user?.course || 'Curso',
       authStore.user?.institution || 'Instituicao',
       draft.location || `${authStore.user?.city}, ${authStore.user?.state}`,

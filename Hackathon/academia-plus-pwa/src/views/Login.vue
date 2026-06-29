@@ -1,16 +1,58 @@
 <template>
   <main class="min-h-screen bg-[#05051d] px-4 py-5 text-slate-950 sm:px-6 lg:px-8">
-    <section class="mx-auto grid min-h-[calc(100vh-2.5rem)] w-full max-w-6xl items-stretch gap-4 md:grid-cols-3">
+    <section class="mx-auto grid min-h-[calc(100vh-2.5rem)] w-full max-w-[420px] items-stretch">
       <article
         class="relative flex min-h-[640px] flex-col overflow-hidden rounded-[28px] border border-white/15 bg-[#101a4a] px-7 py-8 text-white shadow-2xl"
-        :class="screen !== 'welcome' ? 'hidden md:flex' : 'flex'"
+        :class="screen === 'welcome' ? 'flex' : 'hidden'"
       >
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_45%_8%,rgba(139,92,246,0.92),transparent_22rem)]"></div>
         <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(120,62,231,0.28),rgba(5,10,39,0.8))]"></div>
 
         <div class="relative flex flex-1 flex-col items-center justify-center text-center">
-          <div class="mb-8 grid h-28 w-28 place-items-center text-7xl text-white">
-            <i class="pi pi-graduation-cap"></i>
+          <div class="mb-8 grid h-32 w-32 place-items-center text-white">
+            <svg
+              class="h-28 w-28 drop-shadow-[0_18px_18px_rgba(0,0,0,0.28)]"
+              viewBox="0 0 180 140"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M30 61.5 90 36l60 25.5-60 25.7L30 61.5Z"
+                fill="#ffffff"
+              />
+              <path
+                d="M49 73.5c10.2 10.7 24 16.2 41 16.2 17.2 0 31.1-5.5 41.4-16.4v23.4c0 9.9-18.5 17.9-41.3 17.9S49 106.6 49 96.7V73.5Z"
+                fill="#f8fafc"
+              />
+              <path
+                d="M90 36 30 61.5 90 87.2l60-25.7L90 36Z"
+                stroke="#eef2ff"
+                stroke-width="4"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M132 69.5 86 90.3"
+                stroke="#dbe3f0"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+              <path
+                d="M47 70.5v35"
+                stroke="#ffffff"
+                stroke-width="5"
+                stroke-linecap="round"
+              />
+              <path
+                d="M47 104c-4.4 5-6.5 10-6.5 15h13c0-5-2.1-10-6.5-15Z"
+                fill="#ffffff"
+              />
+              <path
+                d="M58 66.5 104 47"
+                stroke="#8792a2"
+                stroke-width="4"
+                stroke-linecap="round"
+              />
+            </svg>
           </div>
           <h1 class="text-4xl font-black">Academia+</h1>
           <p class="mt-6 max-w-[230px] text-lg font-medium leading-snug text-violet-100">
@@ -28,8 +70,7 @@
             label="Entrar"
             outlined
             class="h-12 w-full border-white/60 bg-transparent font-bold text-white"
-            :loading="authStore.loading && quickLoginLoading"
-            @click="handleQuickLogin"
+            @click="openLogin"
           />
           <p class="mx-auto mt-5 max-w-[250px] text-center text-xs font-semibold leading-relaxed text-violet-100">
             Ao continuar, você concorda com os Termos de Uso e Política de Privacidade.
@@ -39,7 +80,70 @@
 
       <article
         class="flex min-h-[640px] flex-col rounded-[28px] border border-slate-200 bg-white px-5 py-7 shadow-2xl sm:px-7"
-        :class="screen !== 'register' ? 'hidden md:flex' : 'flex'"
+        :class="screen === 'login' ? 'flex' : 'hidden'"
+      >
+        <header class="mb-6 grid grid-cols-[2rem_1fr_2rem] items-center">
+          <button
+            type="button"
+            class="grid h-9 w-9 place-items-center rounded-full text-slate-700 transition hover:bg-slate-100"
+            aria-label="Voltar"
+            @click="screen = 'welcome'"
+          >
+            <i class="pi pi-arrow-left"></i>
+          </button>
+          <h2 class="text-center text-xl font-black">Entrar</h2>
+        </header>
+
+        <form class="flex flex-1 flex-col" @submit.prevent="handleLogin">
+          <div class="mb-6 text-center">
+            <div class="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-full bg-violet-100 text-4xl text-violet-600">
+              <i class="pi pi-user"></i>
+            </div>
+            <h3 class="text-xl font-black">Bem-vindo de volta</h3>
+            <p class="mx-auto mt-1 max-w-[250px] text-sm font-medium leading-snug text-slate-500">
+              Entre com uma conta cadastrada.
+            </p>
+          </div>
+
+          <div class="grid gap-4">
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold text-slate-500">E-mail</span>
+              <InputText v-model="loginForm.email" class="w-full" placeholder="E-mail" />
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold text-slate-500">Senha</span>
+              <Password
+                v-model="loginForm.password"
+                :feedback="false"
+                toggleMask
+                inputClass="w-full"
+                class="w-full"
+                placeholder="Senha"
+              />
+            </label>
+          </div>
+
+          <div class="mt-5 rounded-lg bg-slate-50 p-3 text-xs font-semibold leading-relaxed text-slate-500">
+            Contas demo: admin@teste.com / 123 ou user@teste.com / 123456.
+          </div>
+
+          <p v-if="loginError" class="mt-4 rounded-lg bg-red-50 p-3 text-sm font-bold text-red-700">
+            {{ loginError }}
+          </p>
+
+          <Button
+            label="Entrar"
+            type="submit"
+            class="mt-auto h-12 w-full border-none bg-violet-600 font-bold"
+            :loading="authStore.loading"
+          />
+        </form>
+      </article>
+
+      <article
+        class="flex min-h-[640px] flex-col rounded-[28px] border border-slate-200 bg-white px-5 py-7 shadow-2xl sm:px-7"
+        :class="screen === 'register' ? 'flex' : 'hidden'"
       >
         <header class="mb-5 grid grid-cols-[2rem_1fr_2rem] items-center">
           <button
@@ -122,7 +226,7 @@
 
       <article
         class="flex min-h-[640px] flex-col rounded-[28px] border border-slate-200 bg-white px-5 py-7 shadow-2xl sm:px-7"
-        :class="screen !== 'communities' ? 'hidden md:flex' : 'flex'"
+        :class="screen === 'communities' ? 'flex' : 'hidden'"
       >
         <header class="mb-5">
           <h2 class="text-2xl font-black leading-tight">Escolha sua comunidade</h2>
@@ -180,7 +284,7 @@
         <Button
           label="Entrar"
           class="mt-auto h-12 w-full border-none bg-violet-600 font-bold"
-          :loading="authStore.loading && !quickLoginLoading"
+          :loading="authStore.loading"
           @click="handleRegister"
         />
       </article>
@@ -194,7 +298,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '@/stores/auth'
 
-type OnboardingScreen = 'welcome' | 'register' | 'communities'
+type OnboardingScreen = 'welcome' | 'login' | 'register' | 'communities'
 
 const route = useRoute()
 const router = useRouter()
@@ -202,8 +306,8 @@ const toast = useToast()
 const authStore = useAuthStore()
 
 const screen = ref<OnboardingScreen>('welcome')
+const loginError = ref('')
 const registerError = ref('')
-const quickLoginLoading = ref(false)
 const selectedCommunities = ref(['UNIFESP', 'Fisioterapia'])
 
 const courses = ['Fisioterapia', 'Medicina', 'Enfermagem', 'Terapia Ocupacional', 'Psicologia']
@@ -258,6 +362,11 @@ function openRegister() {
   screen.value = 'register'
 }
 
+function openLogin() {
+  loginError.value = ''
+  screen.value = 'login'
+}
+
 function goToAuthenticatedArea() {
   if (redirectTo.value) {
     router.push(redirectTo.value)
@@ -309,13 +418,12 @@ function toggleCommunity(name: string) {
   selectedCommunities.value = [...selectedCommunities.value, name]
 }
 
-async function handleQuickLogin() {
-  quickLoginLoading.value = true
+async function handleLogin() {
+  loginError.value = ''
   const result = await authStore.login(loginForm.email, loginForm.password)
-  quickLoginLoading.value = false
 
   if (!result.success) {
-    toast.add({ severity: 'error', summary: 'Erro', detail: result.message, life: 4000 })
+    loginError.value = result.message ?? 'Nao foi possivel entrar com esses dados.'
     return
   }
 
