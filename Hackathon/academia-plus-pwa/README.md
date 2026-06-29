@@ -81,7 +81,7 @@ Contas demo:
 
 ```txt
 admin@teste.com / 123
-user@teste.com / 123456
+joao@email.com / 123456
 ```
 
 ## Criacao de novas contas
@@ -151,7 +151,7 @@ Funcionalidades principais:
 - Produtos salvos
 - Chat
 - Comunidades por instituicao e gerais
-- Stories clicaveis com produtos, comunicados e comunidades
+- Stories clicaveis com viewer estilo Instagram: tela cheia, stories laterais visíveis, barra de progresso e navegação por toque, teclado e setas
 
 ## Endpoints principais
 
@@ -223,5 +223,5 @@ Relacionamentos:
 - Upload de foto para produto no perfil
 - Cadastro com verificacao academica
 - Comunidades por instituicao, curso e geral
-- Stories clicaveis no feed
+- Stories com viewer estilo Instagram (tela cheia, navegação entre stories, progresso automático, resposta vinculada ao chat)
 - Chat iniciado a partir de interesse em produto
