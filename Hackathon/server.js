@@ -4,7 +4,8 @@ const path = require("path");
 const crypto = require("crypto");
 
 const PORT = process.env.PORT || 3000;
-const PUBLIC_DIR = path.join(__dirname, "public");
+const pwaDistDir = path.join(__dirname, "academia-plus-pwa", "dist");
+const PUBLIC_DIR = fs.existsSync(path.join(pwaDistDir, "index.html")) ? pwaDistDir : path.join(__dirname, "public");
 const DATA_FILE = path.join(__dirname, "data", "app-data.json");
 
 const mimeTypes = {
@@ -12,11 +13,17 @@ const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
-  ".webp": "image/webp"
+  ".webp": "image/webp",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".eot": "application/vnd.ms-fontobject"
 };
 
 function uid(prefix) {
@@ -293,12 +300,16 @@ async function handleApi(req, res, url) {
 
 function serveStatic(req, res, url) {
   const cleanPath = url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);
-  const filePath = path.normalize(path.join(PUBLIC_DIR, cleanPath));
+  let filePath = path.normalize(path.join(PUBLIC_DIR, cleanPath));
 
   if (!filePath.startsWith(PUBLIC_DIR)) {
     res.writeHead(403);
     res.end("Forbidden");
     return;
+  }
+
+  if (!fs.existsSync(filePath) && fs.existsSync(path.join(PUBLIC_DIR, "index.html"))) {
+    filePath = path.join(PUBLIC_DIR, "index.html");
   }
 
   fs.readFile(filePath, (err, content) => {
