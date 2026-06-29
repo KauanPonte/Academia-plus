@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Academia+ | Rede estudantil</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="brand-panel">
+        <div class="logo-mark">A+</div>
+        <h1>Academia+</h1>
+        <p>Conecte. Compartilhe. Evolua.</p>
+        <ul class="value-list">
+          <li><span>🛍</span><strong>Marketplace estudantil</strong><small>Compre e venda usados com precos acessiveis.</small></li>
+          <li><span>👥</span><strong>Comunidades por curso</strong><small>Converse com alunos da sua instituicao ou do Brasil.</small></li>
+          <li><span>💬</span><strong>Chat e grupos</strong><small>Tire duvidas, compartilhe materiais e combine entregas.</small></li>
+          <li><span>🛡</span><strong>LGPD desde o inicio</strong><small>Coleta minima, consentimento e controle dos dados.</small></li>
+        </ul>
+        <strong class="tagline">Para alunos. Por alunos. Com você.</strong>
+      </aside>
+
+      <main class="phone-frame" aria-label="Aplicativo Academia+">
+        <header class="topbar">
+          <div>
+            <strong>Academia+</strong>
+            <span id="scope-label">Para você</span>
+          </div>
+          <button class="icon-btn" data-view="privacy" title="Privacidade">⚙</button>
+        </header>
+
+        <section class="stories" id="stories"></section>
+
+        <nav class="tabs" aria-label="Filtros do feed">
+          <button class="tab active" data-feed="for-you">Para você</button>
+          <button class="tab" data-feed="following">Seguindo</button>
+          <button class="tab" data-feed="institution">Sua instituição</button>
+        </nav>
+
+        <section class="content-view active" id="view-home">
+          <div class="feed" id="feed"></div>
+        </section>
+
+        <section class="content-view" id="view-search">
+          <div class="section-head">
+            <h2>Comprar</h2>
+            <button class="text-btn" id="open-publish">Publicar</button>
+          </div>
+          <label class="search-box">
+            <span>⌕</span>
+            <input id="product-search" type="search" placeholder="Buscar calculadora, jaleco, livros...">
+          </label>
+          <div class="product-grid" id="product-grid"></div>
+        </section>
+
+        <section class="content-view" id="view-communities">
+          <div class="section-head">
+            <h2>Comunidades</h2>
+            <button class="icon-btn" title="Criar comunidade">+</button>
+          </div>
+          <label class="search-box">
+            <span>⌕</span>
+            <input id="community-search" type="search" placeholder="Buscar comunidades">
+          </label>
+          <div class="community-filters">
+            <button class="pill active" data-community-filter="mine">Minhas</button>
+            <button class="pill" data-community-filter="institution">Instituicao</button>
+            <button class="pill" data-community-filter="all">Todas</button>
+          </div>
+          <div id="community-list"></div>
+        </section>
+
+        <section class="content-view" id="view-chat">
+          <div class="section-head">
+            <h2>Chat</h2>
+            <button class="icon-btn" title="Informacoes">i</button>
+          </div>
+          <div class="chat-layout">
+            <div class="conversation-list" id="conversation-list"></div>
+            <div class="conversation-panel">
+              <div id="conversation-title" class="conversation-title"></div>
+              <div id="messages" class="messages"></div>
+              <form id="message-form" class="message-form">
+                <input id="message-input" placeholder="Digite sua mensagem..." autocomplete="off">
+                <button type="submit">Enviar</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-view" id="view-profile">
+          <div class="profile-hero" id="profile-hero"></div>
+          <div class="profile-tabs">
+            <button class="tab active" data-profile="products">Produtos</button>
+            <button class="tab" data-profile="posts">Posts</button>
+            <button class="tab" data-profile="saved">Salvos</button>
+          </div>
+          <div class="saved-list" id="saved-list"></div>
+        </section>
+
+        <section class="content-view" id="view-privacy">
+          <div class="section-head">
+            <h2>Privacidade</h2>
+            <button class="text-btn" data-view="home">Voltar</button>
+          </div>
+          <div class="privacy-stack">
+            <article>
+              <h3>Verificacao estudantil</h3>
+              <p>Use e-mail institucional para receber um codigo. Quando não existir e-mail da faculdade, o documento deve ser privado e removido apos analise.</p>
+              <form id="verification-form" class="inline-form">
+                <input id="institutional-email" type="email" placeholder="nome@aluno.ifce.edu.br">
+                <button>Enviar codigo</button>
+              </form>
+              <small id="verification-result"></small>
+            </article>
+            <article>
+              <h3>Dados coletados</h3>
+              <div id="privacy-lists"></div>
+            </article>
+            <article>
+              <h3>Direitos LGPD</h3>
+              <div class="privacy-actions">
+                <button id="export-data">Exportar meus dados</button>
+                <button class="danger" id="delete-account">Solicitar exclusao</button>
+              </div>
+              <pre id="export-output"></pre>
+            </article>
+          </div>
+        </section>
+
+        <nav class="bottom-nav">
+          <button class="active" data-view="home">⌂<span>Inicio</span></button>
+          <button data-view="search">⌕<span>Buscar</span></button>
+          <button data-view="communities">👥<span>Comunidades</span></button>
+          <button data-view="chat">▣<span>Chat</span></button>
+          <button data-view="profile">◉<span>Perfil</span></button>
+        </nav>
+      </main>
+
+      <aside class="detail-panel" id="detail-panel"></aside>
+    </div>
+
+    <dialog id="publish-dialog">
+      <form method="dialog" class="publish-form" id="publish-form">
+        <div class="section-head">
+          <h2>Publicar</h2>
+          <button class="icon-btn" value="cancel">×</button>
+        </div>
+        <label>Titulo<input name="title" required value="Planner universitario"></label>
+        <label>Descricao<textarea name="description" required>Usado poucas vezes e em otimo estado.</textarea></label>
+        <label>Categoria<select name="category"><option>Material de estudo</option><option>Roupas e acessorios</option><option>Livros</option><option>Servicos</option></select></label>
+        <label>Preco<input name="price" type="number" min="1" required value="35"></label>
+        <label>Preco original<input name="originalPrice" type="number" min="1" value="59"></label>
+        <label>Localizacao<input name="location" value="Sao Paulo, SP"></label>
+        <button class="primary" value="default">Publicar</button>
+      </form>
+    </dialog>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

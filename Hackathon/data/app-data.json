@@ -1,0 +1,274 @@
+{
+  "currentUserId": "user_larissa",
+  "users": [
+    {
+      "id": "user_larissa",
+      "name": "Laura Fisio",
+      "username": "laura.fisio",
+      "email": "laura@aluno.unifesp.br",
+      "course": "Fisioterapia",
+      "institution": "UNIFESP",
+      "city": "Sao Paulo, SP",
+      "photo": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=256&q=80",
+      "verified": true,
+      "verifiedBy": "institutional_email",
+      "reputation": 5,
+      "badges": [
+        "Monitor",
+        "Vendedor confiavel",
+        "Fundador da comunidade"
+      ],
+      "acceptedTerms": true,
+      "acceptedAt": "2026-06-28T12:00:00.000Z",
+      "role": "student"
+    },
+    {
+      "id": "user_joao",
+      "name": "Joao Med",
+      "username": "joao.med",
+      "email": "joao@email.com",
+      "course": "Medicina",
+      "institution": "USP",
+      "city": "Sao Paulo, SP",
+      "photo": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=256&q=80",
+      "verified": false,
+      "verifiedBy": null,
+      "reputation": 4.8,
+      "badges": [
+        "Responde duvidas"
+      ],
+      "acceptedTerms": true,
+      "acceptedAt": "2026-06-28T12:20:00.000Z",
+      "role": "student"
+    }
+  ],
+  "institutions": [
+    {
+      "id": "inst_unifesp",
+      "name": "UNIFESP",
+      "type": "Publica",
+      "domainHints": [
+        "@aluno.unifesp.br",
+        "@unifesp.br"
+      ]
+    },
+    {
+      "id": "inst_usp",
+      "name": "USP",
+      "type": "Publica",
+      "domainHints": [
+        "@usp.br",
+        "@aluno.usp.br"
+      ]
+    },
+    {
+      "id": "inst_pucsp",
+      "name": "PUC-SP",
+      "type": "Privada",
+      "domainHints": [
+        "@aluno.pucsp.br",
+        "@pucsp.br"
+      ]
+    },
+    {
+      "id": "inst_ufrj",
+      "name": "UFRJ",
+      "type": "Publica",
+      "domainHints": [
+        "@ufrj.br"
+      ]
+    },
+    {
+      "id": "inst_ifce",
+      "name": "IFCE",
+      "type": "Publica",
+      "domainHints": [
+        "@aluno.ifce.edu.br",
+        "@ifce.edu.br"
+      ]
+    },
+    {
+      "id": "inst_fgv",
+      "name": "FGV",
+      "type": "Privada",
+      "domainHints": [
+        "@fgv.edu.br"
+      ]
+    }
+  ],
+  "communities": [
+    {
+      "id": "com_med_usp",
+      "title": "Medicina - USP",
+      "course": "Medicina",
+      "institution": "USP",
+      "scope": "institution",
+      "visibility": "publica",
+      "members": 4200,
+      "accent": "#0c7a5d"
+    },
+    {
+      "id": "com_dir_puc",
+      "title": "Direito - PUC-SP",
+      "course": "Direito",
+      "institution": "PUC-SP",
+      "scope": "institution",
+      "visibility": "privada",
+      "members": 3100,
+      "accent": "#1e4f91"
+    },
+    {
+      "id": "com_eng_ufrj",
+      "title": "Engenharia Civil - UFRJ",
+      "course": "Engenharia Civil",
+      "institution": "UFRJ",
+      "scope": "institution",
+      "visibility": "publica",
+      "members": 2700,
+      "accent": "#254b80"
+    },
+    {
+      "id": "com_psico_puc",
+      "title": "Psicologia - PUC-RS",
+      "course": "Psicologia",
+      "institution": "PUC-RS",
+      "scope": "institution",
+      "visibility": "privada",
+      "members": 1800,
+      "accent": "#da8c11"
+    },
+    {
+      "id": "com_brasil",
+      "title": "Geral Brasil",
+      "course": "Todos",
+      "institution": "Brasil",
+      "scope": "general",
+      "visibility": "publica",
+      "members": 18400,
+      "accent": "#7a3fe0"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod_calc",
+      "title": "Calculadora Casio fx-991EX",
+      "price": 120,
+      "originalPrice": 180,
+      "category": "Material de estudo",
+      "condition": "Otimo estado",
+      "location": "Sao Paulo, SP",
+      "image": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQNk81xbhEeSiGGRlGxI_Zk4y9rngHD_khkK1wpAd9a69pEKw3XHCaSf4-WI-Of-qZkbs9qXs0ylqjvaa0weyre5EgvzxBro07HLaId042-RIOXUMCWqhmSKCU",
+      "description": "Perfeita para calculo, estatistica, fisica e muito mais.",
+      "sellerId": "user_larissa",
+      "saved": true,
+      "createdAt": "2026-06-28T10:00:00.000Z"
+    },
+    {
+      "id": "prod_jaleco",
+      "title": "Jaleco branco tamanho M",
+      "price": 80,
+      "originalPrice": 130,
+      "category": "Roupas e acessorios",
+      "condition": "Usado 2 vezes",
+      "location": "Sao Paulo, SP",
+      "image": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTtjQaKs4vkPz1zWwa9N7HhbyvZWXFy976NrabiJk2H9tqBA11ypOE0IaVPmngKdQ-76LGk8i-xOvpPSsz0C723uz8kZgOPKA",
+      "description": "Tecido de otima qualidade, sem manchas ou rasgos.",
+      "sellerId": "user_joao",
+      "saved": true,
+      "createdAt": "2026-06-28T09:00:00.000Z"
+    },
+    {
+      "id": "prod_livro",
+      "title": "Anatomia Humana - Sobotta",
+      "price": 100,
+      "originalPrice": 190,
+      "category": "Livros",
+      "condition": "Com marcacoes leves",
+      "location": "Rio de Janeiro, RJ",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrjvduSjXPYE69WPb-UBFd4Xe6J_fFSbMB-w&s",
+      "description": "Livro bem cuidado, ideal para ciclos basicos.",
+      "sellerId": "user_joao",
+      "saved": true,
+      "createdAt": "2026-06-27T10:00:00.000Z"
+    }
+  ],
+  "posts": [
+    {
+      "id": "post_1",
+      "authorId": "user_larissa",
+      "type": "sale",
+      "productId": "prod_calc",
+      "communityId": "com_brasil",
+      "likes": 23,
+      "comments": 5,
+      "createdAt": "2026-06-28T11:00:00.000Z"
+    },
+    {
+      "id": "post_2",
+      "authorId": "user_joao",
+      "type": "discussion",
+      "text": "Alguem tem resumo bom de neuro para revisar antes da prova?",
+      "communityId": "com_med_usp",
+      "likes": 14,
+      "comments": 9,
+      "createdAt": "2026-06-28T10:24:00.000Z"
+    }
+  ],
+  "chats": [
+    {
+      "id": "chat_med",
+      "title": "Medicina - USP",
+      "type": "group",
+      "communityId": "com_med_usp",
+      "unread": 3,
+      "messages": [
+        {
+          "id": "msg_1",
+          "senderId": "user_joao",
+          "message": "Alguem ja fez a lista de Neuro 2?",
+          "createdAt": "2026-06-28T10:21:00.000Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_2",
+          "senderId": "user_larissa",
+          "message": "Posso mandar aqui meu resumo em PDF.",
+          "createdAt": "2026-06-28T10:22:00.000Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_3",
+          "senderId": "user_joao",
+          "message": "Valeu! Tambem aviso se o prof. liberar a monitoria.",
+          "createdAt": "2026-06-28T10:25:00.000Z",
+          "deletedAt": null
+        }
+      ]
+    },
+    {
+      "id": "chat_sale",
+      "title": "Calculadora Casio",
+      "type": "direct",
+      "productId": "prod_calc",
+      "unread": 1,
+      "messages": [
+        {
+          "id": "msg_4",
+          "senderId": "user_joao",
+          "message": "Oi! Ainda esta disponivel?",
+          "createdAt": "2026-06-28T09:41:00.000Z",
+          "deletedAt": null
+        },
+        {
+          "id": "msg_5",
+          "senderId": "user_larissa",
+          "message": "Esta sim. Posso entregar perto do campus.",
+          "createdAt": "2026-06-28T09:44:00.000Z",
+          "deletedAt": null
+        }
+      ]
+    }
+  ],
+  "reports": [],
+  "verifications": []
+}
