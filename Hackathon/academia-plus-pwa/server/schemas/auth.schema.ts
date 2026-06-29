@@ -15,5 +15,8 @@ export const registerSchema = z.object({
     course: z.string().trim().optional(),
     institution: z.string().trim().optional(),
     bio: z.string().trim().optional(),
+    verificationStatus: z.enum(['unverified', 'institutional_email', 'document_pending']).optional(),
+    enrollmentDocumentName: z.string().trim().optional(),
+    enrollmentDocumentData: z.string().trim().optional(),
   }),
 })

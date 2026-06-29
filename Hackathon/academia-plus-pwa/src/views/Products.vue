@@ -5,7 +5,6 @@
         <h1 class="text-3xl font-black">Marketplace estudantil</h1>
         <p class="text-slate-500">Itens usados, materiais de estudo e servicos entre alunos.</p>
       </div>
-      <Button label="Publicar item" icon="pi pi-plus" class="border-none bg-violet-600" />
     </header>
 
     <section class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -30,7 +29,6 @@
 import { computed, inject, ref } from 'vue'
 import type { Ref } from 'vue'
 import { useRouter } from 'vue-router'
-import Button from 'primevue/button'
 import { store } from '@/store'
 import type { Product } from '@/model/product.model'
 import ProductCard from '@/components/card/ProductCard.vue'

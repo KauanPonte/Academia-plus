@@ -12,6 +12,9 @@ export interface RegisterDTO {
   course?: string
   institution?: string
   bio?: string
+  verificationStatus?: 'unverified' | 'institutional_email' | 'document_pending'
+  enrollmentDocumentName?: string
+  enrollmentDocumentData?: string
 }
 
 export interface AuthUserDTO extends Omit<User, 'password'> {}

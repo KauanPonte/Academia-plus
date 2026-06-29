@@ -99,6 +99,20 @@
           <span class="mb-2 block text-sm font-bold text-slate-600">Cidade, UF</span>
           <InputText v-model="draft.location" class="profile-input w-full" placeholder="Fortaleza, CE" />
         </label>
+        <label class="md:col-span-2">
+          <span class="mb-2 block text-sm font-bold text-slate-600">Foto do produto</span>
+          <span class="flex min-h-28 flex-col items-center justify-center rounded-xl border border-dashed border-violet-200 bg-violet-50 p-4 text-center text-sm font-semibold text-violet-900">
+            <img
+              v-if="draft.imageData"
+              :src="draft.imageData"
+              :alt="draft.imageName || 'Foto do produto'"
+              class="mb-3 h-28 w-28 rounded-lg bg-white object-contain p-2 shadow-sm"
+            />
+            <i v-else class="pi pi-image mb-2 text-2xl text-violet-600"></i>
+            <span>{{ draft.imageName || 'Escolha uma imagem para aparecer no marketplace' }}</span>
+            <input class="sr-only" type="file" accept="image/*" @change="handleProductImageUpload" />
+          </span>
+        </label>
         <p class="rounded-lg bg-emerald-50 p-3 text-sm font-semibold text-emerald-900 md:col-span-2">
           O item aparece nas suas publicações e pode ser encontrado no marketplace estudantil.
         </p>
@@ -226,6 +240,8 @@ const draft = reactive({
   category: '',
   price: '',
   location: '',
+  imageData: '',
+  imageName: '',
 })
 
 interface UserProfile {
@@ -283,7 +299,7 @@ function publishProduct() {
       'Produto publicado pelo perfil. Complete a descrição nas configurações do item.',
       Number(draft.price),
       { id: Date.now(), name: draft.category || 'Material de estudo' },
-      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
+      draft.imageData || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80',
       authStore.user?.email.split('@')[0] || 'aluno',
       authStore.user?.course || 'Curso',
       authStore.user?.institution || 'Instituicao',
@@ -298,6 +314,8 @@ function publishProduct() {
   draft.category = ''
   draft.price = ''
   draft.location = ''
+  draft.imageData = ''
+  draft.imageName = ''
   activePanel.value = null
   showMenu.value = false
 }
@@ -305,6 +323,20 @@ function publishProduct() {
 function openPanel(panel: ProfilePanel) {
   activePanel.value = panel
   showMenu.value = false
+}
+
+function handleProductImageUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) return
+
+  draft.imageName = file.name
+  const reader = new FileReader()
+  reader.onload = () => {
+    draft.imageData = typeof reader.result === 'string' ? reader.result : ''
+  }
+  reader.readAsDataURL(file)
 }
 </script>
 
