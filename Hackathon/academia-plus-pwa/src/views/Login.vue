@@ -9,8 +9,50 @@
         <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(120,62,231,0.28),rgba(5,10,39,0.8))]"></div>
 
         <div class="relative flex flex-1 flex-col items-center justify-center text-center">
-          <div class="mb-8 grid h-28 w-28 place-items-center text-7xl text-white">
-            <i class="pi pi-graduation-cap"></i>
+          <div class="mb-8 grid h-32 w-32 place-items-center text-white">
+            <svg
+              class="h-28 w-28 drop-shadow-[0_18px_18px_rgba(0,0,0,0.28)]"
+              viewBox="0 0 180 140"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M30 61.5 90 36l60 25.5-60 25.7L30 61.5Z"
+                fill="#ffffff"
+              />
+              <path
+                d="M49 73.5c10.2 10.7 24 16.2 41 16.2 17.2 0 31.1-5.5 41.4-16.4v23.4c0 9.9-18.5 17.9-41.3 17.9S49 106.6 49 96.7V73.5Z"
+                fill="#f8fafc"
+              />
+              <path
+                d="M90 36 30 61.5 90 87.2l60-25.7L90 36Z"
+                stroke="#eef2ff"
+                stroke-width="4"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M132 69.5 86 90.3"
+                stroke="#dbe3f0"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+              <path
+                d="M47 70.5v35"
+                stroke="#ffffff"
+                stroke-width="5"
+                stroke-linecap="round"
+              />
+              <path
+                d="M47 104c-4.4 5-6.5 10-6.5 15h13c0-5-2.1-10-6.5-15Z"
+                fill="#ffffff"
+              />
+              <path
+                d="M58 66.5 104 47"
+                stroke="#8792a2"
+                stroke-width="4"
+                stroke-linecap="round"
+              />
+            </svg>
           </div>
           <h1 class="text-4xl font-black">Academia+</h1>
           <p class="mt-6 max-w-[230px] text-lg font-medium leading-snug text-violet-100">
