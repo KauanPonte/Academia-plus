@@ -1,9 +1,9 @@
 <template>
   <main class="min-h-screen bg-[#05051d] px-4 py-5 text-slate-950 sm:px-6 lg:px-8">
-    <section class="mx-auto grid min-h-[calc(100vh-2.5rem)] w-full max-w-6xl items-stretch gap-4 md:grid-cols-3">
+    <section class="mx-auto grid min-h-[calc(100vh-2.5rem)] w-full max-w-[420px] items-stretch">
       <article
         class="relative flex min-h-[640px] flex-col overflow-hidden rounded-[28px] border border-white/15 bg-[#101a4a] px-7 py-8 text-white shadow-2xl"
-        :class="screen !== 'welcome' ? 'hidden md:flex' : 'flex'"
+        :class="screen === 'welcome' ? 'flex' : 'hidden'"
       >
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_45%_8%,rgba(139,92,246,0.92),transparent_22rem)]"></div>
         <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(120,62,231,0.28),rgba(5,10,39,0.8))]"></div>
@@ -28,8 +28,7 @@
             label="Entrar"
             outlined
             class="h-12 w-full border-white/60 bg-transparent font-bold text-white"
-            :loading="authStore.loading && quickLoginLoading"
-            @click="handleQuickLogin"
+            @click="openLogin"
           />
           <p class="mx-auto mt-5 max-w-[250px] text-center text-xs font-semibold leading-relaxed text-violet-100">
             Ao continuar, você concorda com os Termos de Uso e Política de Privacidade.
@@ -39,7 +38,70 @@
 
       <article
         class="flex min-h-[640px] flex-col rounded-[28px] border border-slate-200 bg-white px-5 py-7 shadow-2xl sm:px-7"
-        :class="screen !== 'register' ? 'hidden md:flex' : 'flex'"
+        :class="screen === 'login' ? 'flex' : 'hidden'"
+      >
+        <header class="mb-6 grid grid-cols-[2rem_1fr_2rem] items-center">
+          <button
+            type="button"
+            class="grid h-9 w-9 place-items-center rounded-full text-slate-700 transition hover:bg-slate-100"
+            aria-label="Voltar"
+            @click="screen = 'welcome'"
+          >
+            <i class="pi pi-arrow-left"></i>
+          </button>
+          <h2 class="text-center text-xl font-black">Entrar</h2>
+        </header>
+
+        <form class="flex flex-1 flex-col" @submit.prevent="handleLogin">
+          <div class="mb-6 text-center">
+            <div class="mx-auto mb-4 grid h-20 w-20 place-items-center rounded-full bg-violet-100 text-4xl text-violet-600">
+              <i class="pi pi-user"></i>
+            </div>
+            <h3 class="text-xl font-black">Bem-vindo de volta</h3>
+            <p class="mx-auto mt-1 max-w-[250px] text-sm font-medium leading-snug text-slate-500">
+              Entre com uma conta cadastrada.
+            </p>
+          </div>
+
+          <div class="grid gap-4">
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold text-slate-500">E-mail</span>
+              <InputText v-model="loginForm.email" class="w-full" placeholder="E-mail" />
+            </label>
+
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold text-slate-500">Senha</span>
+              <Password
+                v-model="loginForm.password"
+                :feedback="false"
+                toggleMask
+                inputClass="w-full"
+                class="w-full"
+                placeholder="Senha"
+              />
+            </label>
+          </div>
+
+          <div class="mt-5 rounded-lg bg-slate-50 p-3 text-xs font-semibold leading-relaxed text-slate-500">
+            Contas demo: admin@teste.com / 123 ou user@teste.com / 123456.
+          </div>
+
+          <p v-if="loginError" class="mt-4 rounded-lg bg-red-50 p-3 text-sm font-bold text-red-700">
+            {{ loginError }}
+          </p>
+
+          <Button
+            label="Entrar"
+            type="submit"
+            class="mt-auto h-12 w-full border-none bg-violet-600 font-bold"
+            :loading="authStore.loading"
+          />
+        </form>
+      </article>
+
+      <article
+        class="flex min-h-[640px] flex-col rounded-[28px] border border-slate-200 bg-white px-5 py-7 shadow-2xl sm:px-7"
+        :class="screen === 'register' ? 'flex' : 'hidden'"
       >
         <header class="mb-5 grid grid-cols-[2rem_1fr_2rem] items-center">
           <button
@@ -122,7 +184,7 @@
 
       <article
         class="flex min-h-[640px] flex-col rounded-[28px] border border-slate-200 bg-white px-5 py-7 shadow-2xl sm:px-7"
-        :class="screen !== 'communities' ? 'hidden md:flex' : 'flex'"
+        :class="screen === 'communities' ? 'flex' : 'hidden'"
       >
         <header class="mb-5">
           <h2 class="text-2xl font-black leading-tight">Escolha sua comunidade</h2>
@@ -180,7 +242,7 @@
         <Button
           label="Entrar"
           class="mt-auto h-12 w-full border-none bg-violet-600 font-bold"
-          :loading="authStore.loading && !quickLoginLoading"
+          :loading="authStore.loading"
           @click="handleRegister"
         />
       </article>
@@ -194,7 +256,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '@/stores/auth'
 
-type OnboardingScreen = 'welcome' | 'register' | 'communities'
+type OnboardingScreen = 'welcome' | 'login' | 'register' | 'communities'
 
 const route = useRoute()
 const router = useRouter()
@@ -202,8 +264,8 @@ const toast = useToast()
 const authStore = useAuthStore()
 
 const screen = ref<OnboardingScreen>('welcome')
+const loginError = ref('')
 const registerError = ref('')
-const quickLoginLoading = ref(false)
 const selectedCommunities = ref(['UNIFESP', 'Fisioterapia'])
 
 const courses = ['Fisioterapia', 'Medicina', 'Enfermagem', 'Terapia Ocupacional', 'Psicologia']
@@ -258,6 +320,11 @@ function openRegister() {
   screen.value = 'register'
 }
 
+function openLogin() {
+  loginError.value = ''
+  screen.value = 'login'
+}
+
 function goToAuthenticatedArea() {
   if (redirectTo.value) {
     router.push(redirectTo.value)
@@ -309,13 +376,12 @@ function toggleCommunity(name: string) {
   selectedCommunities.value = [...selectedCommunities.value, name]
 }
 
-async function handleQuickLogin() {
-  quickLoginLoading.value = true
+async function handleLogin() {
+  loginError.value = ''
   const result = await authStore.login(loginForm.email, loginForm.password)
-  quickLoginLoading.value = false
 
   if (!result.success) {
-    toast.add({ severity: 'error', summary: 'Erro', detail: result.message, life: 4000 })
+    loginError.value = result.message ?? 'Nao foi possivel entrar com esses dados.'
     return
   }
 
