@@ -1,35 +1,54 @@
 # Academia+
 
-Academia+ é uma PWA de rede social e marketplace estudantil. A aplicação permite cadastro, login, feed de publicações, perfil, comunidades, chat, produtos salvos, seguidores, curtidas e comentários.
+Academia+ e uma PWA de rede social e marketplace estudantil. O projeto une feed, perfil, comunidades, chat e compra/venda de materiais entre estudantes.
 
-## Execução
+## O que e front e o que e back
 
-Pré-requisito: Node.js 20.19+ ou 22.12+.
+Frontend:
 
-Instale as dependências:
+- Pasta principal: `src`
+- Framework: Vue 3 com TypeScript
+- Rotas e telas: login, cadastro, feed, marketplace, perfil, chat, comunidades e admin
+- Estado local: Pinia e objetos em `src/store.ts`
+- PWA: `public/manifest.webmanifest` e `public/service-worker.js`
+
+Backend:
+
+- Pasta principal: `server`
+- Framework: Express com TypeScript
+- API REST com controllers, services, repositories, schemas e middlewares
+- Autenticacao com JWT
+- Banco JSON local em `server/database/app-db.json`
+- Schema SQL de referencia em `server/database/schema.sql`
+
+## Como rodar
+
+Pre-requisito: Node.js 20.19+ ou 22.12+.
+
+Instale as dependencias:
 
 ```sh
 npm install
 ```
 
-Rode a API REST:
+Rode a API em um terminal:
 
 ```sh
 npm run api:dev
 ```
 
-Rode o frontend PWA em outro terminal:
+Rode o front PWA em outro terminal:
 
 ```sh
 npm run dev
 ```
 
-URLs:
+URLs principais:
 
+- Front/PWA: `http://localhost:5173`
 - API: `http://localhost:3000`
-- PWA: `http://localhost:5173`
 
-Para servir a mesma interface do PWA pela API:
+Para servir as mesmas telas do PWA pela API:
 
 ```sh
 npm run build
@@ -39,111 +58,109 @@ npm run api:start
 
 Depois acesse:
 
-- API + telas PWA: `http://localhost:3000`
+- API com telas do PWA: `http://localhost:3000`
 - Login/onboarding: `http://localhost:3000/login`
 
-Builds de validação:
+Comandos de validacao:
 
 ```sh
+npm run type-check
 npm run api:build
 npm run build
 ```
 
-## Contas Seed
+## Contas para avaliacao
+
+Conta principal recomendada:
+
+```txt
+larissa@aluno.ifce.edu.br / 123456
+```
+
+Contas demo:
 
 ```txt
 admin@teste.com / 123
 user@teste.com / 123456
 ```
 
-## Tecnologias
+## Criacao de novas contas
 
-Frontend:
+Novas contas podem ser criadas pela tela "Criar conta".
 
-- Vue.js 3
-- TypeScript
-- Vite
-- Vue Router
-- Pinia
-- PrimeVue
-- Tailwind CSS
-- PWA com Service Worker
+O fluxo funciona assim:
 
-Backend:
+- Se a API estiver rodando, o cadastro chama `POST /auth/register`.
+- A API salva o usuario em `server/database/app-db.json`.
+- Se a API nao estiver ligada, o front salva a conta no `localStorage` para a banca conseguir testar o fluxo mesmo sem back ativo.
+- Nao e permitido cadastrar duas contas com o mesmo e-mail.
 
-- Node.js
-- TypeScript
-- Express
-- JWT com HMAC SHA-256 usando `node:crypto`
-- Zod para validação
-- Banco JSON local integrado
-- Schema SQL de referência
+Regra de verificacao estudantil:
 
-## MVP Atendido
+- Com e-mail institucional, a conta entra como estudante verificado.
+- Exemplos aceitos: `.edu.br`, `@usp.br`, `@ufrj.br`, `@aluno.unifesp.br`, `@aluno.ifce.edu.br`.
+- Com e-mail nao institucional, a pessoa precisa enviar uma declaracao de matricula no cadastro.
+- A declaracao pode ser PDF ou imagem.
 
-Telas obrigatórias:
+## Uploads e destino dos dados
 
-- Cadastro de usuário
-- Login com autenticação
-- Feed de publicações
-- Perfil do usuário
+O projeto nao usa servidor de arquivos separado. Os uploads sao tratados como dados em base64/URL dentro do proprio fluxo da aplicacao.
 
-Funcionalidades obrigatórias:
+Declaracao de matricula:
 
-- Criar e visualizar posts pela API
-- Curtir e descurtir publicações
-- Comentar posts
-- Seguir e deixar de seguir usuários
-- Visualizar perfil próprio
-- Visualizar perfil de outros usuários
-- Navegar pelo feed, perfil, chat, comunidades e marketplace
-- Publicar item pelo perfil do usuário, no menu de três pontinhos
-- Acessar stories clicáveis com fotos de produtos, comunidades e comunicados
+- O arquivo e lido no front com `FileReader`.
+- O nome do arquivo vai no campo `enrollmentDocumentName`.
+- O conteudo base64 vai no campo `enrollmentDocumentData`.
+- Quando a API esta ligada, esses campos seguem no `POST /auth/register`.
+- O backend aceita esses campos no schema de cadastro e salva o usuario em `server/database/app-db.json`.
+- Quando a API nao esta ligada, os mesmos campos ficam no `localStorage` do navegador.
 
-## Backend
+Foto do produto publicado pelo perfil:
 
-O backend segue arquitetura em camadas:
+- A publicacao do item fica concentrada no perfil do usuario, no menu de tres pontinhos.
+- O marketplace nao tem mais botao proprio de "Publicar item".
+- A imagem escolhida para o produto e lida no front com `FileReader`.
+- A imagem aparece como preview antes da publicacao.
+- Ao publicar, a imagem base64 vira a foto do produto no estado do front/PWA.
+- Esse produto aparece em "Minhas publicacoes" e no marketplace estudantil durante a sessao.
 
-- `server/entities`: entidades de domínio.
-- `server/repositories`: acesso e persistência dos dados.
-- `server/services`: regras de negócio.
-- `server/controllers`: entrada HTTP e respostas REST.
-- `server/routes`: definição dos endpoints.
-- `server/middlewares`: autenticação, autorização, validação e tratamento de erro.
+Observacao tecnica:
 
-Entidades obrigatórias:
+- A API atual de produtos ainda e um catalogo simples em memoria, com `name`, `price`, `stock` e `categoryId`.
+- Por isso, a publicacao rica do perfil, com foto, vendedor, instituicao e localizacao, fica no estado do front.
+- O cadastro de usuario e a declaracao de matricula ja estao integrados ao backend de autenticacao.
 
-- `User`
-- `Post`
-- `Like`
-- `Comment`
-- `Follow`
+## Funcionalidades atendidas
 
-Relacionamentos:
+Telas obrigatorias:
 
-- Usuário cria posts.
-- Usuário curte posts.
-- Usuário comenta posts.
-- Usuário segue outros usuários.
+- Cadastro de usuario
+- Login com autenticacao
+- Feed de publicacoes
+- Perfil do usuario
 
-Banco de dados:
+Funcionalidades principais:
 
-- Banco local funcional: `server/database/app-db.json`
-- Modelagem relacional de referência: `server/database/schema.sql`
+- Criar conta com e-mail institucional ou declaracao de matricula
+- Login com conta real da API ou contas demo
+- Feed com posts, curtidas e comentarios
+- Seguir e deixar de seguir usuarios
+- Visualizar perfil proprio e outros perfis
+- Marketplace estudantil
+- Publicar item pelo perfil, com upload de foto do produto
+- Produtos salvos
+- Chat
+- Comunidades por instituicao e gerais
+- Stories clicaveis com produtos, comunicados e comunidades
 
-Autenticação:
+## Endpoints principais
 
-- Login e cadastro retornam JWT.
-- Rotas protegidas exigem `Authorization: Bearer <token>`.
-
-## Endpoints
-
-Autenticação:
+Autenticacao:
 
 - `POST /auth/register`
 - `POST /auth/login`
 
-Usuários:
+Usuarios:
 
 - `GET /users/me`
 - `PUT /users/me`
@@ -163,65 +180,48 @@ Seguidores:
 - `POST /follows/:id`
 - `DELETE /follows/:id`
 
-Notificações:
+Notificacoes:
 
 - `GET /notifications`
 
-Exemplo de header protegido:
+Rotas protegidas usam:
 
 ```txt
 Authorization: Bearer <token>
 ```
 
-## Funcionalidades Opcionais
+## Estrutura do backend
 
-- Busca de usuários.
-- Edição de perfil.
-- Notificações simplificadas.
-- Paginação no feed.
-- Suporte a tema claro/escuro no perfil via campo `theme`.
-- Chat com persistência local.
-- Produtos salvos.
-- Seguir vendedor.
-- Fluxo de interesse em produto abrindo conversa automaticamente.
+- `server/entities`: entidades de dominio
+- `server/repositories`: acesso e persistencia dos dados
+- `server/services`: regras de negocio
+- `server/controllers`: entrada HTTP e respostas REST
+- `server/routes`: definicao dos endpoints
+- `server/schemas`: validacao com Zod
+- `server/middlewares`: autenticacao, autorizacao, validacao e erros
 
-## Critérios de Avaliação
+Entidades obrigatorias:
 
-25% - MVP atendido:
+- `User`
+- `Post`
+- `Like`
+- `Comment`
+- `Follow`
 
-- Cadastro, login, feed e perfil estão implementados.
-- Posts, curtidas, comentários e seguidores existem na API.
-- A interface tem fluxos de marketplace, comunidades e chat.
+Relacionamentos:
 
-20% - Backend:
+- Usuario cria posts.
+- Usuario curte posts.
+- Usuario comenta posts.
+- Usuario segue outros usuarios.
 
-- Camadas `Entity`, `Repository`, `Service` e `Controller`.
-- API REST com endpoints documentados.
-- JWT em rotas protegidas.
-- Banco integrado e schema SQL.
-- Relacionamentos entre usuários, posts, likes, comments e follows.
+## Diferenciais
 
-20% - Usabilidade, navegação e experiência:
-
-- Navegação por rotas.
-- Feed com abas e filtros.
-- Busca com feedback quando não encontra resultados.
-- Chat, comunidades e detalhe de produto conectados.
-- Ações de salvar, curtir, seguir e conversar.
-
-15% - Interface visual e responsividade:
-
-- Identidade visual roxo/lilás e verde.
-- Layout responsivo para PWA.
-- Telas adaptadas para desktop, notebook, tablet e mobile.
-- Componentes com contraste e estados visuais.
-
-10% - Criatividade e diferenciais:
-
-- Marketplace estudantil integrado ao feed.
-- Comunidades por instituição e curso.
-- Chat iniciado a partir de produtos.
-- Preferências de comunidade.
-- Notificações simplificadas.
-- Stories com destaque de marketplace, comunicados e comunidades.
-- Publicação de item concentrada no perfil do usuário.
+- PWA instalavel
+- Interface unificada entre front PWA e API servindo build
+- Marketplace integrado ao perfil
+- Upload de foto para produto no perfil
+- Cadastro com verificacao academica
+- Comunidades por instituicao, curso e geral
+- Stories clicaveis no feed
+- Chat iniciado a partir de interesse em produto

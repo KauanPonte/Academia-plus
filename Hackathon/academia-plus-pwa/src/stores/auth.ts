@@ -11,6 +11,8 @@ export interface AuthUser {
   institution?: string
   communityScope?: 'institution' | 'general'
   verificationStatus?: 'unverified' | 'institutional_email' | 'document_pending'
+  enrollmentDocumentName?: string
+  enrollmentDocumentData?: string
   city?: string
   state?: string
   cep?: string
@@ -30,6 +32,8 @@ interface RegisterPayload {
   institution: string
   communityScope: 'institution' | 'general'
   verificationStatus: 'unverified' | 'institutional_email' | 'document_pending'
+  enrollmentDocumentName?: string
+  enrollmentDocumentData?: string
   city: string
   state: string
   cep: string
@@ -222,6 +226,8 @@ export const useAuthStore = defineStore('auth', () => {
       institution: payload.institution,
       communityScope: payload.communityScope,
       verificationStatus: payload.verificationStatus,
+      enrollmentDocumentName: payload.enrollmentDocumentName,
+      enrollmentDocumentData: payload.enrollmentDocumentData,
       city: payload.city,
       state: payload.state,
       cep: payload.cep,
@@ -239,12 +245,17 @@ export const useAuthStore = defineStore('auth', () => {
         password: newAccount.password,
         course: newAccount.course,
         institution: newAccount.institution,
+        verificationStatus: payload.verificationStatus,
+        enrollmentDocumentName: payload.enrollmentDocumentName,
+        enrollmentDocumentData: payload.enrollmentDocumentData,
       })
 
       user.value = {
         ...response.user,
         communityScope: payload.communityScope,
         verificationStatus: payload.verificationStatus,
+        enrollmentDocumentName: payload.enrollmentDocumentName,
+        enrollmentDocumentData: payload.enrollmentDocumentData,
         city: payload.city,
         state: payload.state,
         cep: payload.cep,

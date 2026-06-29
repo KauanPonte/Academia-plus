@@ -39,6 +39,9 @@ export function apiRegister<TUser>(payload: {
   course?: string
   institution?: string
   bio?: string
+  verificationStatus?: string
+  enrollmentDocumentName?: string
+  enrollmentDocumentData?: string
 }) {
   return request<ApiAuthResponse<TUser>>('/auth/register', {
     method: 'POST',

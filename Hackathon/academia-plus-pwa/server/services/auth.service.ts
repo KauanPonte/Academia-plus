@@ -114,6 +114,9 @@ export const authService = {
       course: data.course,
       institution: data.institution,
       bio: data.bio,
+      verificationStatus: data.verificationStatus,
+      enrollmentDocumentName: data.enrollmentDocumentName,
+      enrollmentDocumentData: data.enrollmentDocumentData,
       createdAt: new Date().toISOString(),
     })
 

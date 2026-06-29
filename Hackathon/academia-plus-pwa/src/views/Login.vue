@@ -210,6 +210,25 @@
                 class="w-full"
               />
             </label>
+
+            <label class="block">
+              <span class="mb-2 block text-xs font-bold text-slate-500">Declaracao de matricula</span>
+              <span class="flex min-h-20 flex-col justify-center rounded-xl border border-dashed border-violet-200 bg-violet-50 px-4 py-3 text-xs font-semibold leading-relaxed text-violet-900">
+                <span class="flex items-center gap-2">
+                  <i class="pi pi-upload text-violet-600"></i>
+                  {{ registerForm.enrollmentDocumentName || 'Obrigatoria para e-mail nao institucional' }}
+                </span>
+                <small class="mt-1 text-violet-500">
+                  Com e-mail institucional, a verificacao e automatica. Com outro e-mail, envie um PDF ou imagem.
+                </small>
+                <input
+                  class="sr-only"
+                  type="file"
+                  accept="application/pdf,image/*"
+                  @change="handleEnrollmentDocumentUpload"
+                />
+              </span>
+            </label>
           </div>
 
           <p v-if="registerError" class="mt-4 rounded-lg bg-red-50 p-3 text-sm font-bold text-red-700">
@@ -336,6 +355,8 @@ const registerForm = reactive({
   course: '',
   institution: '',
   communityScope: 'institution' as 'institution' | 'general',
+  enrollmentDocumentName: '',
+  enrollmentDocumentData: '',
 })
 
 const redirectTo = computed(() => route.query.redirect?.toString())
@@ -399,6 +420,11 @@ function validateRegisterForm() {
     return false
   }
 
+  if (verificationStatus.value === 'document_pending' && !registerForm.enrollmentDocumentData) {
+    registerError.value = 'Use e-mail institucional ou envie uma declaracao de matricula.'
+    return false
+  }
+
   return true
 }
 
@@ -446,6 +472,8 @@ async function handleRegister() {
     institution: registerForm.institution,
     communityScope: registerForm.communityScope,
     verificationStatus: verificationStatus.value,
+    enrollmentDocumentName: registerForm.enrollmentDocumentName,
+    enrollmentDocumentData: registerForm.enrollmentDocumentData,
     city: 'Sao Paulo',
     state: 'SP',
     cep: '',
@@ -465,5 +493,19 @@ async function handleRegister() {
     life: 3000,
   })
   goToAuthenticatedArea()
+}
+
+function handleEnrollmentDocumentUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  if (!file) return
+
+  registerForm.enrollmentDocumentName = file.name
+  const reader = new FileReader()
+  reader.onload = () => {
+    registerForm.enrollmentDocumentData = typeof reader.result === 'string' ? reader.result : ''
+  }
+  reader.readAsDataURL(file)
 }
 </script>
