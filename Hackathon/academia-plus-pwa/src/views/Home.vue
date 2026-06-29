@@ -1,4 +1,9 @@
 <template>
+  <StoryViewer
+    v-model="activeStoryIndex"
+    :stories="feedStories"
+    @story-action="handleStoryAction"
+  />
   <main class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
     <section class="min-w-0">
     <header class="rounded-2xl border border-slate-200 bg-white px-5 pt-5 pb-3 shadow-sm">
@@ -296,6 +301,7 @@ import { computed, onMounted, ref } from 'vue'
 import { isProductSaved, store, toggleSavedProduct, type FeedPostType } from '@/store'
 import { useAuthStore } from '@/stores/auth'
 import { apiFetchPosts, apiLikePost, apiUnlikePost, apiCommentPost } from '@/services/api'
+import StoryViewer from '@/components/StoryViewer.vue'
 
 const authStore = useAuthStore()
 const activeTab = ref('for-you')
@@ -305,6 +311,7 @@ const notificationMessage = ref('')
 const loadingPosts = ref(false)
 const commentingPostId = ref<string | number | null>(null)
 const commentText = ref('')
+const activeStoryIndex = ref<number | null>(null)
 
 // Tipo unificado para posts da API e posts locais
 interface DisplayPost {
@@ -450,11 +457,20 @@ const allPosts = computed<DisplayPost[]>(() => {
   return localDisplayPosts.value
 })
 
+const authorAvatarMap = computed(() => {
+  const map: Record<string, string> = {}
+  store.feedPosts.forEach((post) => {
+    if (post.avatar && !map[post.author]) map[post.author] = post.avatar
+  })
+  return map
+})
+
 interface FeedStory {
   label: string
   initials: string
   color: string
   avatar: string
+  authorAvatar: string
   isMine: boolean
   institution: string
   kind: 'mine' | 'product' | 'announcement' | 'community'
@@ -466,20 +482,21 @@ const feedStories = computed<FeedStory[]>(() => [
     label: 'Seu story',
     initials: 'EU',
     color: 'bg-violet-600',
-    avatar:
-      'https://picsum.photos/200',
+    avatar: 'https://picsum.photos/200',
+    authorAvatar: 'https://picsum.photos/200',
     isMine: true,
     institution: authStore.user?.institution || 'IFCE',
     kind: 'mine' as const,
     message: 'Seu espaço: veja recomendações, produtos e avisos selecionados para você.',
   },
   ...store.products.slice(0, 3).map((product) => ({
-    label: product.name,
-    initials: product.name.slice(0, 2).toUpperCase(),
+    label: product.seller,
+    initials: product.seller.slice(0, 2).toUpperCase(),
     color: 'bg-emerald-600',
     avatar: product.image,
+    authorAvatar: authorAvatarMap.value[product.seller] ?? '',
     isMine: false,
-    institution: product.sellerInstitution,
+    institution: `${product.sellerCourse} • ${product.sellerInstitution}`,
     kind: 'product' as const,
     message: `${product.name} está no marketplace por R$ ${product.price},00.`,
   })),
@@ -487,8 +504,8 @@ const feedStories = computed<FeedStory[]>(() => [
     label: 'Comunicado',
     initials: 'AV',
     color: 'bg-orange-500',
-    avatar:
-      'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=256&q=80',
+    avatar: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=256&q=80',
+    authorAvatar: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=256&q=80',
     isMine: false,
     institution: authStore.user?.institution || 'IFCE',
     kind: 'announcement' as const,
@@ -499,6 +516,10 @@ const feedStories = computed<FeedStory[]>(() => [
     initials: community.course.slice(0, 2).toUpperCase(),
     color: community.color,
     avatar:
+      community.id % 2 === 0
+        ? 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=256&q=80'
+        : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=256&q=80',
+    authorAvatar:
       community.id % 2 === 0
         ? 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=256&q=80'
         : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=256&q=80',
@@ -629,6 +650,11 @@ async function submitComment(post: DisplayPost) {
 }
 
 function selectStory(story: FeedStory) {
+  const idx = feedStories.value.indexOf(story)
+  activeStoryIndex.value = idx >= 0 ? idx : 0
+}
+
+function handleStoryAction(story: FeedStory) {
   notificationMessage.value = story.message
 
   if (story.kind === 'mine') {
